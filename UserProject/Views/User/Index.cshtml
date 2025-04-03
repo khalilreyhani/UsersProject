@@ -1,0 +1,53 @@
+﻿@{
+    ViewData["Title"] = "لیست افراد";
+}
+
+<div id="PersonTable"></div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#PersonTable').jtable({
+                title: 'لیست افراد',
+                actions: {
+                    listAction: function (postData, jtParams) {
+                        var deferred = $.Deferred();
+
+                        // ارسال درخواست به API
+                        fetch('/api/data/GetPeople')
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);  // برای اطمینان از صحت داده‌ها
+
+                                // بررسی نتیجه API
+                                if (data.result === "OK") {
+                                    // ارسال داده‌ها به jTable
+                                    deferred.resolve({
+                                        "Result": "OK",
+                                        "Records": data.records
+                                    });
+                                } else {
+                                    deferred.reject();
+                                }
+                            })
+                            .catch(error => {
+                                // در صورت بروز خطا
+                                deferred.reject();
+                                console.error('خطا در دریافت داده‌ها:', error);
+                            });
+
+                        return deferred.promise();
+                    }
+                },
+                fields: {
+                    id: { title: 'شناسه', key: true },
+                    name: { title: 'نام' },
+                    age: { title: 'سن' }
+                }
+            });
+
+            // بارگذاری داده‌ها
+            $('#PersonTable').jtable('load');
+        });
+    </script>
+}
