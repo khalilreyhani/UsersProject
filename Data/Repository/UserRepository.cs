@@ -26,7 +26,9 @@ namespace Repository
 
         public void Delete(int Id)
         {
-            throw new NotImplementedException();
+            var user = Get(Id);
+            user.IsDeleted = true;
+            Update(user);
         }
 
         public Domain.Models.User.User Get(int Id)
@@ -87,35 +89,14 @@ namespace Repository
 
         public async Task InsertAsyncUser(Domain.Models.User.User entity)
         {
-            using (var transaction = await _ctx.Database.BeginTransactionAsync())
-            {
-                try
-                {
+           
                     // عملیات اول
-                    var user = _ctx.Users.Add(entity);
+                     _ctx.Users.Add(entity);
                     await _ctx.SaveChangesAsync();
 
-                    // عملیات دوم
-                    //UserRole userRole = new UserRole();
-                    //userRole.UserId = user.Entity.Id;
-                    //userRole.RoleId = 2;
-                    //_ctx.UserRoles.Add(userRole);
+                   
                     await _ctx.SaveChangesAsync();
 
-                    //3
-                 
-
-                    // تایید تراکنش
-                    await transaction.CommitAsync();
-                }
-                catch (Exception ex)
-                {
-                    // بازگرداندن تراکنش در صورت خطا
-                    await transaction.RollbackAsync();
-                    // مدیریت خطا
-                    throw;
-                }
-            }
 
         
 

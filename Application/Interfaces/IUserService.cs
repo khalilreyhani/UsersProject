@@ -11,13 +11,15 @@ namespace Application.Interfaces
     public interface IUserService
 {
 
+        public UserListViewModel GetUsers(int Skip = 0,int Take  = 10);
 
-        public UserListViewModel GetallUser(int pageId = 1, int id = 0, string filterUserName = "");
+        public Task<ServicesStatus> AddUserORUpdate(PersonViewModel person);
 
-        public ServicesStatus AddUser(User user);
+        public PersonViewModel GetPerson(int id);
 
-        public User GetUserbyId(string id);
-        public User GetUserbyintId(int id);
+
+        public UserDetail GetUserDetail(int userid);
+        
 
         public ServicesStatus EditUser(User model);
 

@@ -20,3 +20,36 @@ html {
 body {
   margin-bottom: 60px;
 }
+#detailsModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 60%; /* تنظیم عرض به 60% صفحه */
+    max-width: 500px; /* حداکثر عرض مودال */
+    height: auto; /* تنظیم ارتفاع خودکار */
+    max-height: 80%; /* حداکثر ارتفاع 80% صفحه */
+    overflow-y: auto; /* اگر محتوا بیشتر از ارتفاع شد، اسکرول ایجاد می‌شود */
+}
+
+#formModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px; /* افزایش پدینگ برای فضای بیشتر */
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 80%; /* تنظیم عرض به 80% از صفحه */
+    max-width: 900px; /* حداکثر عرض مودال */
+    height: auto; /* تنظیم ارتفاع خودکار */
+    max-height: 90%; /* حداکثر ارتفاع مودال 90% صفحه */
+    overflow-y: auto; /* اگر محتوا بیشتر از ارتفاع شد، اسکرول نمایش داده شود */
+}

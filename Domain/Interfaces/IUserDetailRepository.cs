@@ -9,6 +9,6 @@ namespace Domain.Interfaces
 {
     public interface IUserDetailRepository:IGneralRepository<UserDetail>
 {
-
+        public UserDetail GetUserDetailbyUserid(int id);
 }
 }

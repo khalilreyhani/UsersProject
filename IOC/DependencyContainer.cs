@@ -1,7 +1,13 @@
 ﻿
 
 
+using Application.Interfaces;
+using Application.Services;
+using Data.Repository;
+using Domain.Interfaces;
+using Domain.InterFaces;
 using Microsoft.Extensions.DependencyInjection;
+using Repository;
 
 namespace DependencyContainer
 {
@@ -9,12 +15,16 @@ namespace DependencyContainer
     {
         public static void ConfigureDependencies(this IServiceCollection service)
         {
+            service.AddScoped<IUserService, UserService>();
+            service.AddScoped<IUserRepository, UserRepository>();
+            service.AddScoped<IUserDetailRepository, UserDetailRepository>();
+
             //Application Layer 
             //service.AddScoped<IUserService, UserService>();
             //service.AddScoped<IEmailSenderSite, EmailSenderSite>();
             //service.AddScoped<IUserAdminService, UserAdminService>();
             //service.AddScoped<ICarService, CarService>();
-            
+
             //service.AddScoped<IPermissionService, PermissionService>();
             //service.AddScoped<IWalletService, WalletService>();
             //service.AddScoped<ISmsSender, SmsSender>();
@@ -34,12 +44,12 @@ namespace DependencyContainer
             //service.AddScoped<ICarRepository, CarRepository>();
             //service.AddScoped<INotificationRepository, NotificationRepository>();
             //service.AddScoped<IUserRepository, UserRepository>();
-          
+
             //service.AddScoped<IRolesRepository, RoleRepository>();
             //service.AddScoped<IUserRolesRepository, UserRolesRepository>();
             //service.AddScoped<IWalletRepository, WalletRepository>();
             //service.AddScoped<ISMSRepository, SMSRepository>();
-        
+
             //service.AddScoped<IVisitRepository, VisitRepository>();
             //service.AddScoped<IMassageRepository, MassageRepository>();
             //service.AddScoped<IAccountRepository,AccountRepository>();

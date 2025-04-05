@@ -34,6 +34,20 @@ namespace Data.Repository
             throw new NotImplementedException();
         }
 
+        public UserDetail GetUserDetailbyUserid(int id)
+        {
+            
+
+            try
+            {
+                return _ctx.userDetails.FirstOrDefault(x => x.UserId == id);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public void Insert(UserDetail entity)
         {
             throw new NotImplementedException();

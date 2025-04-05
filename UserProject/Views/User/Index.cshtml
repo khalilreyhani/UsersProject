@@ -2,52 +2,380 @@
     ViewData["Title"] = "لیست افراد";
 }
 
+
+<button id="openModal" style="margin-bottom:20px" class="btn btn-success">افزودن کاربر</button>
 <div id="PersonTable"></div>
+<div class="container mt-4">
+
+
+    <div id="formModal" dir="rtl" class="modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        <div class="modal-header">
+            <h5 class="modal-title">فرم اطلاعات</h5>
+            <button type="button" id="closeModal" class="btn-close"></button>
+        </div>
+        <div class="modal-body">
+
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="basic-tab" data-tab="basic" href="#">اطلاعات پایه</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="advanced-tab" data-tab="advanced" href="#">اطلاعات تکمیلی</a>
+                </li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="basic">
+                    <div class="mb-3">
+                        <input type="hidden" id="id" />
+
+                        <label for="basic1" class="form-label">نام کاربری</label>
+                        <input type="text" class="form-control" id="basic1" name="Basic1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="basic2" class="form-label">تلفن</label>
+                        <input type="number" class="form-control" id="basic2" name="Basic2">
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="advanced">
+                    <div class="mb-3">
+                        <label for="advanced1" class="form-label">سن</label>
+                        <input type="number" class="form-control" id="advanced1" name="Advanced1">
+                    </div>
+                    <div class="mb-3">
+                        <label for="sex" class="form-label">جنسیت</label>
+                        <select class="form-control" id="advanced2" name="Sex">
+                            <option value="2">انتخاب کنید</option>
+                            <option value="1">مرد</option>
+                            <option value="0">زن</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="submit" id="save" class="btn btn-primary">ذخیره</button>
+            <button type="reset" id="reset" class="btn btn-secondary">کنسل</button>
+        </div>
+    </div>
+</div>
+
+<div id="detailsModal" class="modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); width: 60%; max-width: 500px; height: auto; max-height: 80%; overflow-y: auto;">
+    <div class="modal-header">
+        <h5 class="modal-title">جزئیات کاربر</h5>
+        <button type="button" id="closeDetailsModal" class="btn-close"></button>
+    </div>
+    <div class="modal-body">
+        <p><strong>سن:</strong> <span id="detailAge"></span></p>
+        <p><strong>جنسیت:</strong> <span id="detailSex"></span></p>
+    </div>
+</div>
+
+
 
 @section Scripts {
     <script>
         $(document).ready(function () {
             $('#PersonTable').jtable({
-                title: 'لیست افراد',
+                title: 'لیست افراد',  
+                paging: true, 
+                pageSize: 10, 
+                sorting: true, 
+                defaultSorting: 'Name ASC', 
+
                 actions: {
                     listAction: function (postData, jtParams) {
                         var deferred = $.Deferred();
 
-                        // ارسال درخواست به API
-                        fetch('/api/data/GetPeople')
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log(data);  // برای اطمینان از صحت داده‌ها
+                    
+                        var jtSorting = jtParams.jtSorting || '';  // مرتب‌سازی
+                        var jtStartIndex = jtParams.jtStartIndex || 0;  // شاخص شروع
+                        var jtPageSize = jtParams.jtPageSize || 10;  // تعداد صفحه‌ها
 
-                                // بررسی نتیجه API
-                                if (data.result === "OK") {
-                                    // ارسال داده‌ها به jTable
-                                    deferred.resolve({
-                                        "Result": "OK",
-                                        "Records": data.records
-                                    });
-                                } else {
-                                    deferred.reject();
-                                }
-                            })
-                            .catch(error => {
-                                // در صورت بروز خطا
-                                deferred.reject();
-                                console.error('خطا در دریافت داده‌ها:', error);
-                            });
+                            fetch(`/api/data/GetPeople?jtStartIndex=${jtStartIndex}&jtPageSize=${jtPageSize}&jtSorting=${jtSorting}`)
+
+        .then(response => {
+
+            if (!response.ok) {
+                // در صورت بروز خطا در پاسخ
+                throw new Error(`Server error: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);  // برای اطمینان از صحت داده‌ها
+
+          
+            if (data.result === "OK") {
+               
+                deferred.resolve({
+                    "Result": "OK",
+                    "Records": data.records,
+                    "TotalRecordCount": data.totalRecordCount  // ارسال تعداد کل رکوردها برای صفحه‌بندی
+                });
+            } else {
+                deferred.reject();
+            }
+        })
+        .catch(error => {
+            // در صورت بروز خطا
+            deferred.reject();
+            console.error('خطا در دریافت داده‌ها:', error);
+        });
 
                         return deferred.promise();
-                    }
+                    }//,
+
+
+
                 },
                 fields: {
                     id: { title: 'شناسه', key: true },
-                    name: { title: 'نام' },
-                    age: { title: 'سن' }
+                    userName: { title: 'نام کاربری' },
+                    mobile: { title: 'موبایل' },
+
+                     actions: {
+            title: 'امکانات',
+            sorting: false,
+            display: function (data) {
+                return `
+                <button class="btn btn-info show-details" data-id="${data.record.id}">نمایش جزئیات</button>
+                    <button class="btn btn-warning edit-btn" data-id="${data.record.id}">ویرایش</button>
+                    <button class="btn btn-danger delete-btn" data-id="${data.record.id}">حذف</button>
+                `;
+            }
+        }
                 }
             });
 
-            // بارگذاری داده‌ها
+        
             $('#PersonTable').jtable('load');
         });
+
+
+             $(document).ready(function () {
+            $("#customDialog").dialog({
+                autoOpen: false,
+                modal: true,
+                title: "افزودن کاربر",
+                buttons: {
+                    "ذخیره2": function () {
+                        addUser();
+                    },
+                    "لغو": function () {
+                        $(this).dialog("close");
+                    }
+                }
+            });
+
+            $("#openDialog").click(function () {
+                $("#customDialog").dialog("open");
+            });
+
+            function addUser() {
+                var name = $("#nameInput").val();
+                var age = $("#ageInput").val();
+
+                if (!name || !age) {
+                    alert("لطفاً تمامی فیلدها را پر کنید!");
+                    return;
+                }
+
+                fetch('/api/data/AddPerson', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name: name, age: parseInt(age) })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.Result === "OK") {
+                        alert("✅ کاربر با موفقیت اضافه شد!");
+                        $("#customDialog").dialog("close");
+                        location.reload(); 
+                    } else {
+                        alert("❌ خطا در افزودن کاربر!");
+                    }
+                })
+                .catch(error => console.error('❌ خطا در ارسال درخواست:', error));
+            }
+        });
+
+
+
+
+
+                //--------------------------addUser
+
+
+              $(document).ready(function () {
+            $("#openModal").click(function () {
+        $("#id").val(0);
+        $("#formModal").show();
+            });
+
+            $("#closeModal").click(function () {
+                $("#formModal").hide();
+            });
+            $("#reset").click(function () {
+                $("#formModal").hide();
+            });
+
+                $("#save").click(function () {
+            let Id = $("#id").val().trim();
+            let basic1 = $("#basic1").val().trim();
+            let basic2 = $("#basic2").val().trim();
+
+            // بررسی اینکه فیلدهای Basic1 و Basic2 خالی نباشند
+            if (basic1 === "" || basic2 === "") {
+                alert("لطفا فیلدهای Basic را پر کنید!");
+                return;
+            }
+
+           
+            let personData = {
+                Id:Id,
+                UserName: basic1,
+                  Mobile: basic2,
+                     Age:  parseInt($("#advanced1").val().trim()) || 0,
+                     Sex:  parseInt($("#advanced2").val().trim()) || 0
+
+            };
+
+             console.log(personData);
+
+            // ارسال اطلاعات به API
+            $.ajax({
+                url: "api/Data/AddPerson",
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(personData),
+                success: function (response) {
+                    alert("اطلاعات با موفقیت ثبت شد!");
+                    console.log(response);
+                      $('#PersonTable').jtable('load');
+                },
+                error: function (xhr, status, error) {
+                    alert("خطا در ارسال اطلاعات!");
+                    console.log(error);
+                }
+            });
+        });
+
+            $(".nav-link").click(function (e) {
+                e.preventDefault();
+                var tab = $(this).data("tab");
+
+                $(".tab-pane").removeClass("show active"); // حذف کلاس نمایش از تمام تب‌ها
+                $("#" + tab).addClass("show active"); // افزودن کلاس نمایش به تب انتخابی
+
+                $(".nav-link").removeClass("active"); // حذف حالت فعال از تمام تب‌ها
+                $(this).addClass("active"); // اضافه کردن کلاس فعال به تب کلیک‌شده
+            });
+        });
+
+           //--------------------------end addUser
+
+
+              //--------------------------show-details
+
+                 $(document).on("click", ".show-details", function () {
+            let personId = $(this).data("id");  // گرفتن شناسه کاربر
+             console.log(personId);
+            $.ajax({
+                url: `/api/Data/GetPerson/${personId}`,
+                type: "GET",
+                success: function (person) {
+                    // پر کردن داده‌ها در مودال
+                                 console.log(person);
+                    $("#id").text(person.id);
+
+                    $("#detailAge").text(person.age);
+                    $("#detailSex").text(person.sex === true ? "مرد" : "زن");
+
+                    // نمایش مودال
+                    $("#detailsModal").show();
+                },
+                error: function () {
+                    alert("فاقد  جزئیات");
+                }
+            });
+        });
+
+        // بستن مودال جزئیات
+        $("#closeDetailsModal").click(function () {
+            $("#detailsModal").hide();
+        });
+        //--------------------------end show-details
+        //
+        //    //--------------------------update-details
+                     $(document).on("click", ".edit-btn", function () {
+            // گرفتن شناسه کاربر از دکمه
+            var personId = $(this).data("id");
+
+            // ارسال درخواست به API برای دریافت جزئیات کاربر با شناسه مشخص
+            $.ajax({
+                url: `/api/Data/GetUpdate/${personId}`,
+                type: "GET",
+                success: function (response) {
+                    // بررسی اینکه آیا پاسخ حاوی داده است
+                    if (response && response.id) {
+                        // پر کردن فیلدهای مودال با داده‌های دریافتی
+                        var person = response;
+                        console.log(person);  // مشاهده داده‌ها در کنسول برای اطمینان
+
+                        // پر کردن فیلدهای مربوطه
+                        $("#id").val(person.id);  // نام کاربری
+                        $("#basic1").val(person.userName);  // نام کاربری
+                        $("#basic2").val(person.mobile);    // تلفن
+                        if (person.age != null) {
+                            $("#advanced1").val(person.age);  // سن
+                        }
+                        if (person.sex != null) {
+                            $("#advanced2").val(person.sex);  // جنسیت
+                        }
+
+                        // نمایش مودال
+                        $("#formModal").show();
+                    } else {
+                        alert("کاربر پیدا نشد!");
+                    }
+                },
+                error: function () {
+                    alert("خطا در دریافت اطلاعات کاربر!");
+                }
+            });
+        });
+        //--------------------------end update-details
+
+
+                $(document).on("click", ".delete-btn", function () {
+            // گرفتن شناسه کاربر از دکمه حذف
+            var personId = $(this).data("id");
+
+            // نمایش تاییدیه حذف
+            var confirmDelete = confirm("آیا مطمئنید که می‌خواهید این کاربر را حذف کنید؟");
+            if (confirmDelete) {
+                // ارسال درخواست DELETE به API برای حذف کاربر
+                $.ajax({
+                    url: `/api/Data/Delete/${personId}`,
+                    type: "DELETE",
+                    success: function (response) {
+                        console.log(response);
+                        // بررسی موفقیت آمیز بودن درخواست
+                        alert(response.message); // نمایش پیام موفقیت
+                        // حذف ردیف مربوطه از جدول
+                        $(`[data-id='${personId}']`).closest("tr").remove();
+                          $('#PersonTable').jtable('load');
+                    },
+                    error: function () {
+                        alert("خطا در حذف کاربر!");
+                    }
+                });
+            }
+        });
+
+
+
     </script>
 }
